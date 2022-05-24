@@ -1,1 +1,1 @@
-# MicroShift_on_OSTree_systems
+# Deploy MicroShift on a OSTree based system
