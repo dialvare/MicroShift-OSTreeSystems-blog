@@ -171,35 +171,27 @@ NAME    TYPE           CLUSTER-IP     EXTERNAL-IP     PORT(S)        AGE
 nginx   LoadBalancer   10.43.228.39   192.168.1.240   80:30643/TCP   8s
 ```
 
-Finally, if everything is configured correctly (it should be at this point), it will be possible to access the application using our browser:
+Finally, if everything is configured correctly (it should be at this point), it will be possible to access the application using a browser. Before installing the browser, we need to allow the machine to show the graphical interface in a window. Then, we can install our preferred browser. In my case, I'll use Firefox:
 ```
-curl 192.168.1.240
+rpm-ostree upgrade
 
-<!DOCTYPE html>
-<html>
-<head>
-<title>Welcome to nginx!</title>
-<style>
-html { color-scheme: light dark; }
-body { width: 35em; margin: 0 auto;
-font-family: Tahoma, Verdana, Arial, sans-serif; }
-</style>
-</head>
-<body>
-<h1>Welcome to nginx!</h1>
-<p>If you see this page, the nginx web server is successfully installed and
-working. Further configuration is required.</p>
+rpm-ostree install xauth xhost
+rpm-ostree install firefox
 
-<p>For online documentation and support please refer to
-<a href="http://nginx.org/">nginx.org</a>.<br/>
-Commercial support is available at
-<a href="http://nginx.com/">nginx.com</a>.</p>
-
-<p><em>Thank you for using nginx.</em></p>
-</body>
-</html>
+systemctl reboot
 ```
 
+Connect again to the machine, but this time, adding the *-Y* command to allow graphical windows:
+```
+ssh -Y -p 3022 root@127.0.0.1
+```
 
+Now, access the NGINX application throught the External IP in the Firefox browser:
+```
+firefox http://192.168.1.240
+```
 
+A new window will pop up and you'll see the page shown below:
+
+<img src="https://github.com/dialvare/MicroShift-OSTreeSystems-blog/blob/main/Nginx.png" width="660" height="270">
 
