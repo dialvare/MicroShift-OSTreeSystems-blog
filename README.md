@@ -91,6 +91,90 @@ curl -O https://mirror.openshift.com/pub/openshift-v4/$(uname -m)/clients/ocp/st
 sudo tar -xf openshift-client-linux.tar.gz -C /usr/local/bin oc kubectl
 ```
 
+Let's move the *kubeconfig* file to the default location. Note that we don't need to install Podman because it's already part of the *rpm-ostree* entity:
+```
+mkdir ~/.kube
+sudo podman cp microshift:/var/lib/microshift/resources/kubeadmin/kubeconfig ~/.kube/config
+sudo chown `whoami`: ~/.kube/config
+```
+
+Good news: MicroShift is now installed and running, and we can use *oc* commands to verify that MicroShift is working:
+```
+oc get pods -A
+
+NAMESPACE                       NAME                                  READY   STATUS    RESTARTS   AGE
+kube-system                     kube-flannel-ds-4g8mq                 1/1     Running   1          16h
+kubevirt-hostpath-provisioner   kubevirt-hostpath-provisioner-gmc7l   1/1     Running   1          16h
+openshift-dns                   dns-default-kz7g7                     2/2     Running   2          16h
+openshift-dns                   node-resolver-9wvnl                   1/1     Running   1          16h
+openshift-ingress               router-default-6c96f6bc66-5dckf       1/1     Running   1          16h
+openshift-service-ca            service-ca-7bffb6f6bf-w584c           1/1     Running   1          16h
+```
+
+To end this blog, we're going to test it with a sample application. Let's deploy a Metal LB to route traffic.
+
+Firstly, create a new namespace and the deployment:
+```
+oc apply -f https://raw.githubusercontent.com/metallb/metallb/v0.11.0/manifests/namespace.yaml
+oc apply -f https://raw.githubusercontent.com/metallb/metallb/v0.11.0/manifests/metallb.yaml
+```
+
+Once the components are available, we need to createa a *ConfigMap* to define the address pool taht the LB will be using:
+```
+oc create -f - <<EOF
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: metallb-system
+  name: config
+data:
+  config: |
+    address-pools:
+    - name: default
+      protocol: layer2
+      addresses:
+      - 192.168.1.240-192.168.1.250    
+EOF
+```
+
+To see if everithing is working as expected, we are going to create a test applicaton:
+```
+oc create ns test
+oc create deployment nginx -n test --image nginx
+```
+
+Then, deploy a service:
+```
+oc create -f - <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: test
+  annotations:
+    metallb.universe.tf/address-pool: default
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: nginx
+  type: LoadBalancer
+EOF
+```
+
+Check if an external IP has been assigned to the service:
+```
+oc get svc -n test
+
+NAME    TYPE           CLUSTER-IP     EXTERNAL-IP     PORT(S)        AGE
+nginx   LoadBalancer   10.43.228.39   192.168.1.240   80:30643/TCP   8s
+```
+
+Finally, if everything is configured correctly (it should be at this point), it will be possible to access the application using our browser:
+
+
+
 
 
 
