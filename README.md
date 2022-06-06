@@ -1,4 +1,6 @@
 # Deploy MicroShift on an OSTree based system
+by Diego Alvarez
+
 MicroShift is a research project which aims to reduce Kubernetes and OKD (the Kubernetes distribution by the OpenShift community) footprints, in order to be deployed on edge computing devices. 
 
 ## Install an OSTree based system
