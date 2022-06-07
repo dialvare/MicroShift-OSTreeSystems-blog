@@ -69,13 +69,29 @@ sudo curl -o /etc/systemd/system/microshift.service \
 https://raw.githubusercontent.com/redhat-et/microshift/main/packaging/systemd/microshift-containerized.service
 ````
 
-To provide more security in our deployment, we're going configure a firewall to allow only the ports and connections that MicroShift needs to usee. Below are listed the ones to be considered:
+To provide more security in our deployment, we're going to configure a firewall to allow only the ports and connections that MicroShift needs to use. Below are listed the ones to be considered:
 
 | Port | Protocol | Description |
 |---|---|---|
 | 80 | TCP | HTTP port to serve applicactions |
 | 443 | TCP | HTTPS port to serve applications |
 | 5353 | UDP | Port to expose the mDNS service |
+
+Enable the firewall and add the ports mentioned above. Additionally, add the PodIP range (*10.42.0.0/16 in my case*) to allow the pods to contact the internal coreDNS server:
+
+````
+sudo firewall-cmd --zone=trusted --add-source=10.42.0.0/16 --permanent
+sudo firewall-cmd --zone=public --add-port=80/tcp --permanent
+sudo firewall-cmd --zone=public --add-port=443/tcp --permanent
+sudo firewall-cmd --zone=public --add-port=5353/udp --permanent
+sudo firewall-cmd --reload
+````
+
+At this point, we can enable MicroShift by running the command:
+
+````
+sudo systemctl enable microshift --now
+````
 
 
 
