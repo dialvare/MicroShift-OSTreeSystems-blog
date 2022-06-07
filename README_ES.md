@@ -69,7 +69,7 @@ sudo curl -o /etc/systemd/system/microshift.service \
 https://raw.githubusercontent.com/redhat-et/microshift/main/packaging/systemd/microshift-containerized.service
 ````
 
-To provide more security in our deployment, we're going to configure a firewall to allow only the ports and connections that MicroShift needs to use. Below are listed the ones to be considered:
+To provide more security in our deployment, we're going to configure a firewall to allow only the ports and connections that MicroShift needs to use. Below are listed the ones to be considered, but more Networkin information can be found in the [Firewall documentation](https://microshift.io/docs/user-documentation/networking/firewall/):
 
 | Port | Protocol | Description |
 |---|---|---|
