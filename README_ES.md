@@ -93,9 +93,40 @@ At this point, we can enable MicroShift by running the command:
 sudo systemctl enable microshift --now
 ````
 
+Install the OpenShift client to access the cluster:
 
+````
+curl -O https://mirror.openshift.com/pub/openshift-v4/$(uname -m)/clients/ocp/stable/openshift-client-linux.tar.gz
+sudo tar -xf openshift-client-linux.tar.gz -C /usr/local/bin oc kubectl
+````
 
+Finally, let's move the *kubeconfig* file to the default location to avoid scaling permissions. Note that we don't need to install Podman because it's already part of the *rpm-ostree* entity:
+
+```
+mkdir ~/.kube
+sudo podman cp microshift:/var/lib/microshift/resources/kubeadmin/kubeconfig ~/.kube/config
+sudo chown `whoami`: ~/.kube/config
+```
+
+That's all! Now we have MicroShift deployed and running on a OSTree based system! With it, you can run typical *oc* commnands, as shown in the example:
+
+````
+oc get pods -A
+
+NAMESPACE                       NAME                                  READY   STATUS    RESTARTS   AGE
+kube-system                     kube-flannel-ds-4g8mq                 1/1     Running   1          16h
+kubevirt-hostpath-provisioner   kubevirt-hostpath-provisioner-gmc7l   1/1     Running   1          16h
+openshift-dns                   dns-default-kz7g7                     2/2     Running   2          16h
+openshift-dns                   node-resolver-9wvnl                   1/1     Running   1          16h
+openshift-ingress               router-default-6c96f6bc66-5dckf       1/1     Running   1          16h
+openshift-service-ca            service-ca-7bffb6f6bf-w584c           1/1     Running   1          16h
+````
 
 ## Sample application 
+
+
+
+
+
 
 ## What's next?
