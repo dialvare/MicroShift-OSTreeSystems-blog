@@ -33,7 +33,7 @@ As shown in the image, some parts will be marked with a warning icon, meaning th
   - Change the *User name* if needed.
   - Set the *Password*.
 
-When finished, click on the **Begin Installation** button. Once completed, reboot the machine. Our node is currently running Fedora IoT as its operating system. We can use *SSH* to connect to the machine. Log in as *root* (we'll need full privilegies to deploy MicroShift) and enter the *password* provided during the installation:
+When finished, click on the **Begin Installation** button. Once completed, reboot the machine. Our node is currently running Fedora IoT as its operating system. We can use *ssh* to connect to the machine. Log in as *root* (we'll need full privilegies to deploy MicroShift) and enter the *password* provided during the installation:
 
 ````
 ssh -p 3022 root@127.0.0.1
@@ -151,7 +151,7 @@ data:
 EOF
 ````
 
-Deploy a test application to ensure that everything was well configured and is working as expected:
+Deploy an *nginx* test application to ensure that everything was well configured and is working as expected:
 
 ````
 oc create ns test
@@ -188,8 +188,31 @@ NAME    TYPE           CLUSTER-IP     EXTERNAL-IP     PORT(S)        AGE
 nginx   LoadBalancer   10.43.228.39   192.168.1.240   80:30643/TCP   8s
 ````
 
+At this point, we should reach the *nginx* application through that External-IP. To do so, we're going to install in our *rpm-ostree* some packages to allow graphical interfaces and the web browser *Firefox*. Then, reboot the machine:
 
+````
+rpm-ostree upgrade
 
+rpm-ostree install xauth xhost
+rpm-ostree install firefox
 
+systemctl reboot
+````
+
+Once the machine is up and running again, we can *ssh* it, but this time, using the *-Y* command to take advantage of the graphical window:
+
+````
+ssh -Y -p 3022 root@127.0.0.1
+````
+
+To conclude, run the following command to access the *nginx* application using the web browser:
+
+````
+firefox http://192.168.1.240
+````
+
+A new window will pop up and you'll see the page shown below:
+
+<img src="https://github.com/dialvare/MicroShift-OSTreeSystems-blog/blob/main/Nginx.png" width="660" height="270">
 
 ## What's next?
