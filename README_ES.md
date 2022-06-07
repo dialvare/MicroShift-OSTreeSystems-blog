@@ -39,7 +39,46 @@ When finished, click on the **Begin Installation** button. Once completed, reboo
 ssh -p 3022 root@127.0.0.1
 ````
 
-## Deploy MicroShift
+## Deploying MicroShift
+Now, we're ready to proceed with the MicroShift installation. We're going to embed MicroShift as part of the base Fedora IoT *rpm-ostree*. Let's start by including all needed repositories to embed MicroShift in our Fedora IoT system:
+
+````
+curl -L -o /etc/yum.repos.d/fedora-modular.repo https://src.fedoraproject.org/rpms/fedora-repos/raw/rawhide/f/fedora-modular.repo
+curl -L -o /etc/yum.repos.d/fedora-updates-modular.repo https://src.fedoraproject.org/rpms/fedora-repos/raw/rawhide/f/fedora-updates-modular.repo
+curl -L -o /etc/yum.repos.d/group_redhat-et-microshift-fedora-36.repo https://copr.fedorainfracloud.org/coprs/g/redhat-et/microshift/repo/fedora-36/group_redhat-et-microshift-fedora-36.repo
+````
+
+Then, we can enable the *crio-o* module. This step allows us to select the needed packages to be installed in our base *rpm-ostree*:
+
+````
+rpm-ostree ex module enable cri-o:1.21
+````
+
+It's important to keep in mind that, when trying to install some dependencies in an *rpm-ostree*, we must perform an update to ensure that all newer verisons are installed. In OSTree based systems, the base layer is an atomic entity, so when installing a local package, older dependency versions will not be updated. Once this is known, we can continue installing the packages and dependeces for MicroShift. Then reboot the node:
+
+```
+rpm-ostree upgrade
+rpm-ostree install cri-o cri-tools microshift
+systemctl reboot
+```
+
+Let's continue by obtaining the MicroShift service. Run the following command:
+
+````
+sudo curl -o /etc/systemd/system/microshift.service \
+https://raw.githubusercontent.com/redhat-et/microshift/main/packaging/systemd/microshift-containerized.service
+````
+
+To provide more security in our deployment, we're going configure a firewall to allow only the ports and connections that MicroShift needs to usee. Below are listed the ones to be considered:
+
+| Port | Protocol | Description |
+|---|---|---|
+| 80 | TCP | HTTP port to serve applicactions |
+| 443 | TCP | HTTPS port to serve applications |
+| 5353 | UDP | Port to expose the mDNS service |
+
+
+
 
 ## Sample application 
 
