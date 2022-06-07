@@ -3,7 +3,7 @@ by Diego Alvarez
 
 <img src="https://github.com/dialvare/MicroShift-OSTreeSystems-blog/blob/main/MicroShift%20architecture.png" width="800" height="380">
 
-As edge computing evolves and increases every time, new requirements and capabilities are needed in order to deploy and manage workloads on the edge. Microshift arises from the necessity of having a solution capable of providing the same experience that we could have by running OpenShift/Kubernetes on traditional infrastructures while decreasing the resource footprint. Therefore, MicroShift allows deploying Openshift solutions at scale for field-deployed edge computing devices.
+As edge computing evolves and increases every time, new requirements and capabilities are needed in order to deploy and manage workloads on the edge. MicroShift arises from the necessity of having a solution capable of providing the same experience that we could have by running OpenShift/Kubernetes on traditional infrastructures while decreasing the resource footprint. Therefore, MicroShift allows deploying Openshift solutions at scale for field-deployed edge computing devices.
 
 To ensure basic security standards, edge computing should run on optimized operating systems. OSTree based systems provide immutability and are based in transactions for rollbacks and upgrades. In addtion to providing a safe environtment, these systems also allow avoiding workload disruptions. These capabilities make OSTree based systems the ideal environment to run MicroShift on. 
 
@@ -12,7 +12,7 @@ There are currently several Operating Systems which fall under this category (OS
 ## Installing Fedora IoT
 The first steep will be installing the choosen Operating System in our machine. We can download the Fedora IoT image from the [official releases page](https://getfedora.org/en/iot/download/). In my case, I'm going to select the **Fedora 36: Installer ISO for x86_64** (the latest version at the time i'm writting this blogpost).
 
-Once downloaded the installer, we need to set up the machine to reboot and initialize from that ISO image. Right after restarting the machine, we'll see the next screen. Select **Install Fedora-IoT 36**:
+Once the installer is downloaded we need to set up the machine to reboot and initialize from that ISO image. Right after restarting the machine, we'll see the next screen. Select **Install Fedora-IoT 36**:
 
 <img src="https://github.com/dialvare/MicroShift-OSTreeSystems-blog/blob/main/Fedora%20IoT%20Installer.png" width="500" height="250">
 
@@ -35,14 +35,16 @@ As shown in the image, some parts will be marked with a warning icon, meaning th
   - Change the *User name* if needed.
   - Set the *Password*.
 
-When finished, click on the **Begin Installation** button. Once completed, reboot the machine. Our node is currently running Fedora IoT as its operating system. We can use *ssh* to connect to the machine. Log in as *root* (we'll need full privilegies to deploy MicroShift) and enter the *password* provided during the installation:
+When finished, click on the **Begin Installation** button. Once completed, reboot the machine. If completed correctly, our node should be running Fedora IoT as its operating system. 
+
+For the next steps, we can use *ssh* to connect to the machine. Log in as *root* (we'll need full privilegies to deploy MicroShift) and enter the *password* provided during the installation:
 
 ````
 ssh -p 3022 root@127.0.0.1
 ````
 
 ## Deploying MicroShift
-Now, we're ready to proceed with the MicroShift installation. We're going to embed MicroShift as part of the base Fedora IoT *rpm-ostree*. Let's start by including all needed repositories to embed MicroShift in our Fedora IoT system:
+Now, we're ready to proceed with the MicroShift installation. We're going to embed MicroShift on the Operating System to be part of the base *rpm-ostree*. Let's start by including all the required repositories to embed MicroShift in our Fedora IoT system:
 
 ````
 curl -L -o /etc/yum.repos.d/fedora-modular.repo https://src.fedoraproject.org/rpms/fedora-repos/raw/rawhide/f/fedora-modular.repo
@@ -50,13 +52,13 @@ curl -L -o /etc/yum.repos.d/fedora-updates-modular.repo https://src.fedoraprojec
 curl -L -o /etc/yum.repos.d/group_redhat-et-microshift-fedora-36.repo https://copr.fedorainfracloud.org/coprs/g/redhat-et/microshift/repo/fedora-36/group_redhat-et-microshift-fedora-36.repo
 ````
 
-Then, we can enable the *crio-o* module. This step allows us to select the needed packages to be installed in our base *rpm-ostree*:
+Then, we can enable the *crio-o* module. This step allows us to select the packages to be installed in our base *rpm-ostree*:
 
 ````
 rpm-ostree ex module enable cri-o:1.21
 ````
 
-It's important to keep in mind that, when trying to install some dependencies in an *rpm-ostree*, we must perform an update to ensure that all newer verisons are installed. In OSTree based systems, the base layer is an atomic entity, so when installing a local package, older dependency versions will not be updated. Once this is known, we can continue installing the packages and dependeces for MicroShift. Then reboot the node:
+It's important to note that when trying to install some dependencies in an *rpm-ostree*, we must perform an update to ensure that all newer verisons are installed. In OSTree based systems, the base layer is an atomic entity, so when installing a local package, older dependency versions will not be updated. Keeping this in mind, we can continue installing the packages and dependeces for MicroShift. When done, reboot the node:
 
 ```
 rpm-ostree upgrade
@@ -71,7 +73,7 @@ sudo curl -o /etc/systemd/system/microshift.service \
 https://raw.githubusercontent.com/redhat-et/microshift/main/packaging/systemd/microshift-containerized.service
 ````
 
-To provide more security in our deployment, we're going to configure a firewall to allow only the ports and connections that MicroShift needs to use. Below are listed the ones to be considered, but more Networkin information can be found in the [Firewall documentation](https://microshift.io/docs/user-documentation/networking/firewall/):
+To further seure our deployment, we're going to configure the system firewall to only allow connections through the ports that MicroShift needs to use. The ones to be considered are listed below:
 
 | Port | Protocol | Description |
 |---|---|---|
@@ -79,7 +81,9 @@ To provide more security in our deployment, we're going to configure a firewall 
 | 443 | TCP | HTTPS port to serve applications |
 | 5353 | UDP | Port to expose the mDNS service |
 
-Enable the firewall and add the ports mentioned above. Additionally, add the PodIP range (*10.42.0.0/16 in my case*) to allow the pods to contact the internal coreDNS server:
+More networkin information regarding firewall connections can be found in the **firewall** section of [MicroShift documentation](https://microshift.io/docs/user-documentation/networking/firewall/):
+
+We should configure the firewall by abling connections through the ports previously stated. Additionally, we will add the PodIP range (*10.42.0.0/16 in my case*) to allow the pods to contact the internal coreDNS server:
 
 ````
 sudo firewall-cmd --zone=trusted --add-source=10.42.0.0/16 --permanent
@@ -89,13 +93,13 @@ sudo firewall-cmd --zone=public --add-port=5353/udp --permanent
 sudo firewall-cmd --reload
 ````
 
-At this point, we can enable MicroShift by running the command:
+At this point, we can finally enable MicroShift by running the following command:
 
 ````
 sudo systemctl enable microshift --now
 ````
 
-Install the OpenShift client to access the cluster:
+Next, we'll install the OpenShift client to access the cluster:
 
 ````
 curl -O https://mirror.openshift.com/pub/openshift-v4/$(uname -m)/clients/ocp/stable/openshift-client-linux.tar.gz
@@ -134,7 +138,7 @@ oc apply -f https://raw.githubusercontent.com/metallb/metallb/v0.11.0/manifests/
 oc apply -f https://raw.githubusercontent.com/metallb/metallb/v0.11.0/manifests/metallb.yaml
 ````
 
-Then, we need to createa a *ConfigMap* to define the address pool that the LB will be using:
+Then, we need to create a *ConfigMap* to define the address pool that the LB will be using:
 
 ````
 oc create -f - <<EOF
@@ -160,7 +164,7 @@ oc create ns test
 oc create deployment nginx -n test --image nginx
 ````
 
-Create the service, by creating and applying the following file:
+Create the service, by generating the following file:
 
 ````
 oc create -f - <<EOF
@@ -190,7 +194,7 @@ NAME    TYPE           CLUSTER-IP     EXTERNAL-IP     PORT(S)        AGE
 nginx   LoadBalancer   10.43.228.39   192.168.1.240   80:30643/TCP   8s
 ````
 
-At this point, we should reach the *nginx* application through that External-IP. To do so, we're going to install in our *rpm-ostree* some packages to allow graphical interfaces and the web browser *Firefox*. Then, reboot the machine:
+At this point, we should reach the *nginx* application through that External-IP. To do so, we're going to install *Firefox* web browser in our *rpm-ostree*, as well as some other packages to allow the usage of GUIs. Then, reboot the machine:
 
 ````
 rpm-ostree upgrade
@@ -201,7 +205,7 @@ rpm-ostree install firefox
 systemctl reboot
 ````
 
-Once the machine is up and running again, we can *ssh* it, but this time, using the *-Y* command to take advantage of the graphical window:
+Once the machine is up and running again, we can *ssh* into it, but this time, using the *-Y* command to take advantage of the graphical window:
 
 ````
 ssh -Y -p 3022 root@127.0.0.1
