@@ -1,6 +1,8 @@
 # Deploying MicroShift on an OSTree based system
 by Diego Alvarez
 
+<img src="https://github.com/dialvare/MicroShift-OSTreeSystems-blog/blob/main/MicroShift%20architecture.png" width="800" height="380">
+
 As edge computing evolves and increases every time, new requirements and capabilities are needed in order to deploy and manage workloads on the edge. Microshift arises from the necessity of having a solution capable of providing the same experience that we could have by running OpenShift/Kubernetes on traditional infrastructures while decreasing the resource footprint. Therefore, MicroShift allows deploying Openshift solutions at scale for field-deployed edge computing devices.
 
 To ensure basic security standards, edge computing should run on optimized operating systems. OSTree based systems provide immutability and are based in transactions for rollbacks and upgrades. In addtion to providing a safe environtment, these systems also allow avoiding workload disruptions. These capabilities make OSTree based systems the ideal environment to run MicroShift on. 
