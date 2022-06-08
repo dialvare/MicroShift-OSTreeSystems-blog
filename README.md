@@ -5,12 +5,12 @@ by Diego Alvarez
 
 As edge computing evolves and increases every time, new requirements and capabilities are needed in order to deploy and manage workloads on the edge. MicroShift arises from the necessity of having a solution capable of providing the same experience that we could have by running OpenShift/Kubernetes on traditional infrastructures while decreasing the resource footprint. Therefore, MicroShift allows deploying Openshift solutions at scale for field-deployed edge computing devices.
 
-To ensure basic security standards, edge computing should run on optimized operating systems. OSTree based systems provide immutability and are based in transactions for rollbacks and upgrades. In addtion to providing a safe environtment, these systems also allow avoiding workload disruptions. These capabilities make OSTree based systems the ideal environment to run MicroShift on. 
+To ensure basic security standards, edge computing should run on optimized operating systems. OSTree based systems provide immutability and are based on transactions for rollbacks and upgrades. In addition to providing a safe environment, these systems also allow avoiding workload disruptions. These capabilities make OSTree based systems the ideal environment to run MicroShift on. 
 
 There are currently several Operating Systems which fall under this category (OSTree based systems). Among the most known options we can find OS such as Fedora IoT or RHEL for Edge. In this blog, we'll be focusing on how to deploy MicroShift on Fedora IoT.
 
 ## Installing Fedora IoT
-The first steep will be installing the choosen Operating System in our machine. We can download the Fedora IoT image from the [official releases page](https://getfedora.org/en/iot/download/). In my case, I'm going to select the **Fedora 36: Installer ISO for x86_64** (the latest version at the time i'm writting this blogpost).
+The first step will be installing the chosen Operating System in our machine. We can download the Fedora IoT image from the [official releases page](https://getfedora.org/en/iot/download/). In my case, I'm going to select the **Fedora 36: Installer ISO for x86_64** (the latest version at the time I'm writing this blogpost).
 
 Once the installer is downloaded we need to set up the machine to reboot and initialize from that ISO image. Right after restarting the machine, we'll see the next screen. Select **Install Fedora-IoT 36**:
 
@@ -37,7 +37,7 @@ As shown in the image, some parts will be marked with a warning icon, meaning th
 
 When finished, click on the **Begin Installation** button. Once completed, reboot the machine. If completed correctly, our node should be running Fedora IoT as its operating system. 
 
-For the next steps, we can use *ssh* to connect to the machine. Log in as *root* (we'll need full privilegies to deploy MicroShift) and enter the *password* provided during the installation:
+For the next steps, we can use *ssh* to connect to the machine. Log in as *root* (we'll need full privileges to deploy MicroShift) and enter the *password* provided during the installation:
 
 ````
 ssh -p 3022 root@127.0.0.1
@@ -58,7 +58,7 @@ Then, we can enable the *crio-o* module. This step allows us to select the packa
 rpm-ostree ex module enable cri-o:1.21
 ````
 
-It's important to note that when trying to install some dependencies in an *rpm-ostree*, we must perform an update to ensure that all newer verisons are installed. In OSTree based systems, the base layer is an atomic entity, so when installing a local package, older dependency versions will not be updated. Keeping this in mind, we can continue installing the packages and dependeces for MicroShift. When done, reboot the node:
+It's important to note that when trying to install some dependencies in an *rpm-ostree*, we must perform an update to ensure that all newer versions are installed. In OSTree based systems, the base layer is an atomic entity, so when installing a local package, older dependency versions will not be updated. Keeping this in mind, we can continue installing the packages and dependencies for MicroShift. When done, reboot the node:
 
 ```
 rpm-ostree upgrade
@@ -73,17 +73,17 @@ sudo curl -o /etc/systemd/system/microshift.service \
 https://raw.githubusercontent.com/redhat-et/microshift/main/packaging/systemd/microshift-containerized.service
 ````
 
-To further seure our deployment, we're going to configure the system firewall to only allow connections through the ports that MicroShift needs to use. The ones to be considered are listed below:
+To further secure our deployment, we're going to configure the system firewall to only allow connections through the ports that MicroShift needs to use. The ones to be considered are listed below:
 
 | Port | Protocol | Description |
 |---|---|---|
-| 80 | TCP | HTTP port to serve applicactions |
+| 80 | TCP | HTTP port to serve applications |
 | 443 | TCP | HTTPS port to serve applications |
 | 5353 | UDP | Port to expose the mDNS service |
 
-More networkin information regarding firewall connections can be found in the **firewall** section of [MicroShift documentation](https://microshift.io/docs/user-documentation/networking/firewall/):
+More networking information regarding firewall connections can be found in the *Firewall section* of [MicroShift documentation](https://microshift.io/docs/user-documentation/networking/firewall/).
 
-We should configure the firewall by abling connections through the ports previously stated. Additionally, we will add the PodIP range (*10.42.0.0/16 in my case*) to allow the pods to contact the internal coreDNS server:
+We should configure the firewall by enabling connections through the ports previously stated. Additionally, we will add the PodIP range (*10.42.0.0/16 in my case*) to allow the pods to contact the internal coreDNS server:
 
 ````
 sudo firewall-cmd --zone=trusted --add-source=10.42.0.0/16 --permanent
@@ -106,7 +106,7 @@ curl -O https://mirror.openshift.com/pub/openshift-v4/$(uname -m)/clients/ocp/st
 sudo tar -xf openshift-client-linux.tar.gz -C /usr/local/bin oc kubectl
 ````
 
-Finally, let's move the *kubeconfig* file to the default location to avoid scaling permissions. Note that we don't need to install Podman because it's already part of the *rpm-ostree* entity:
+Finally, let's move the *kubeconfig* file to the default location to avoid scaling permissions. Note that we don't need to install *podman* because it's already part of the *rpm-ostree* entity:
 
 ```
 mkdir ~/.kube
@@ -114,7 +114,7 @@ sudo podman cp microshift:/var/lib/microshift/resources/kubeadmin/kubeconfig ~/.
 sudo chown `whoami`: ~/.kube/config
 ```
 
-That's all! Now we have MicroShift deployed and running on a OSTree based system! With it, you can run typical *oc* commnands, as shown in the example:
+That's all! Now we have MicroShift deployed and running on an OSTree based system! With it, you can run typical *oc* commands, as shown in the example:
 
 ````
 oc get pods -A
@@ -129,7 +129,7 @@ openshift-service-ca            service-ca-7bffb6f6bf-w584c           1/1     Ru
 ````
 
 ## Sample application 
-Before finishing this blog post, and with the objective of validating the installation, we're going to deploy a basic application. For this example, we can deploy a **Metal Load Balancer**, to manage and route traffic. 
+Before finishing this blog post, and with the objective of validating the installation, we're going to deploy a basic application. For this example, we can deploy a **Metal Load Balancer** to manage and route traffic. 
 
 Firstly, create the *namespace* and *deployment* for the load balancer:
 
@@ -185,7 +185,7 @@ spec:
 EOF
 ````
 
-Verify the *External-IP* automaticaly assigned to our service. It might take some time, so we can add the *watch* statement to refresh the command every 2 seconds:
+Verify the *External-IP* automatically assigned to our service. It might take some time, so we can add the *watch* statement to refresh the command every 2 seconds:
 
 ````
 watch oc get svc -n test
