@@ -222,3 +222,8 @@ A new window will pop up and you'll see the page shown below:
 <img src="https://github.com/dialvare/MicroShift-OSTreeSystems-blog/blob/main/Nginx.png" width="660" height="270">
 
 ## What's next?
+Now you know how to embed and configure MicroShift in an OSTree based system, by previously installing the Fedora IoT Operating System. In addition, we have validated the installation by deploying and running a sample application.
+
+For further information, please refer to the [MicroShift project site](https://microshift.io/docs/home/), where you'll find all the documentation, release notes and demos. You can also check the source code on this [GitHub repository](https://github.com/openshift/microshift).
+
+Do you want to [get involved](https://microshift.io/docs/community/) in our community? Join our Slack channel or attend one of our bi-weekly calls!
