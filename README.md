@@ -7,7 +7,7 @@ As edge computing evolves and increases every time, new requirements and capabil
 
 To ensure basic security standards, edge computing should run on optimized operating systems. OSTree based systems provide immutability and are based on transactions for rollbacks and upgrades. In addition to providing a safe environment, these systems also allow avoiding workload disruptions. These capabilities make OSTree based systems the ideal environment to run MicroShift on. 
 
-There are currently several Operating Systems which fall under this category (OSTree based systems). Among the most known options we can find OS such as Fedora IoT or RHEL for Edge. In this blog, we'll be focusing on how to deploy MicroShift on Fedora IoT.
+There are currently several Operating Systems which fall under this category (OSTree based systems). Among the most known options we can find OS such as Fedora IoT or RHEL. In this blog, we'll be focusing on how to deploy MicroShift on Fedora IoT.
 
 ## Installing Fedora IoT
 The first step will be installing the chosen Operating System in our machine. We can download the Fedora IoT image from the [official releases page](https://getfedora.org/en/iot/download/). In my case, I'm going to select the **Fedora 36: Installer ISO for x86_64** (the latest version at the time I'm writing this blogpost).
